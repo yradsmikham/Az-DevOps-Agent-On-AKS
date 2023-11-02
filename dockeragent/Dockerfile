@@ -11,7 +11,7 @@
 # ganrad01: ID10092020 : Use base image Ubuntu:18.04, libcurl4 and Helm v3
 # ganrad01: ID02242021 : libicu60 is a dependency for .NET Core 3.1
 #
-FROM ubuntu:18.04
+FROM --platform=linux/amd64 ubuntu:18.04
 MAINTAINER Ganesh Radhakrishnan ganrad01@gmail.com
 
 # To make it easier for build and release pipelines to run apt-get,
@@ -21,8 +21,9 @@ RUN echo "APT::Get::Assume-Yes \"true\";" > /etc/apt/apt.conf.d/90assumeyes
 
 # ID02242021.sn
 RUN apt-get update
+RUN apt-get dist-upgrade 
 RUN apt-get install -y software-properties-common
-RUN add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main"
+RUN add-apt-repository "deb [arch=amd64] http://security.ubuntu.com/ubuntu xenial-security main restricted"
 # ID02242021.en
 
 RUN apt-get install -y --no-install-recommends \
@@ -46,12 +47,16 @@ RUN apt-get install -y --no-install-recommends \
         # software-properties-common \
         apt-utils
 
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+# https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
+RUN apt-get install ca-certificates curl gnupg
+RUN install -m 0755 -d /etc/apt/keyrings
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+RUN chmod a+r /etc/apt/keyrings/docker.gpg
 
-RUN add-apt-repository \
-   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-   $(lsb_release -cs) \
-   stable"
+RUN echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 # Setup Aqua Trivy public key and repo. - ID09272019
 RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-key add -

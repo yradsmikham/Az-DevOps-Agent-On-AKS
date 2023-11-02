@@ -5,22 +5,27 @@
 replicaCount: 2
 
 image:
-  repository: <ACR Name>.azurecr.io/azdevopsagent
-  tag: <Image Tag name>
+  repository: teamrocketregistry.azurecr.io/azdevopsagent
+  tag: v2
   pullPolicy: Always
+imageCredentials:
+  registry: teamrocketregistry.azurecr.io
+  username: teamrocketregistry
+  password: "password"
 
 docker:
   image:
     repository: docker
     tag: 20.10.4-dind
 
-imagePullSecrets: []
+imagePullSecrets: 
+  - name: registrykey
 nameOverride: ""
 fullnameOverride: ""
 
 azdevops:
-  azpUrl: "https://dev.azure.com/org-name"
-  azpToken: "<Azure DevOps PAT Token"
+  azpUrl: "https://dev.azure.com/team-rocket"
+  azpToken: "token"
   azpPool: "AKS-Agent-Pool"
   # azpAgentName: "AKS-Agent"
 
