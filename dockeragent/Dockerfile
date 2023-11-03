@@ -11,7 +11,7 @@
 # ganrad01: ID10092020 : Use base image Ubuntu:18.04, libcurl4 and Helm v3
 # ganrad01: ID02242021 : libicu60 is a dependency for .NET Core 3.1
 #
-FROM --platform=linux/amd64 ubuntu:18.04
+FROM --platform=linux/amd64 ubuntu:20.04
 MAINTAINER Ganesh Radhakrishnan ganrad01@gmail.com
 
 # To make it easier for build and release pipelines to run apt-get,
@@ -35,7 +35,7 @@ RUN apt-get install -y --no-install-recommends \
 	libcurl4 \
         # libcurl3 \
         # libicu55 \
-        libicu60 \
+        # libicu60 \
         libunwind8 \
         netcat \
         zip \
