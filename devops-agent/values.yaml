@@ -3,10 +3,10 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 2
-
+#nodeName: aks-x86pool-17247651-vmss000000
 image:
   repository: teamrocketregistry.azurecr.io/azdevopsagent
-  tag: v2
+  tag: v5
   pullPolicy: Always
 imageCredentials:
   registry: teamrocketregistry.azurecr.io
@@ -25,7 +25,7 @@ fullnameOverride: ""
 
 azdevops:
   azpUrl: "https://dev.azure.com/team-rocket"
-  azpToken: "token"
+  azpToken: "azdo_pat_token"
   azpPool: "AKS-Agent-Pool"
   # azpAgentName: "AKS-Agent"
 
@@ -59,7 +59,8 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-nodeSelector: {}
+nodeSelector:
+  agentpool: x86pool
 
 tolerations: []
 
