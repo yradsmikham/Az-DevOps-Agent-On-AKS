@@ -1,41 +1,30 @@
-# Azure DevOps Pipeline Agent : 08-16-2019
+# Azure DevOps Pipeline Agent : 11-07-2023
 #
 # Description: This dockerfile builds an Azure DevOps self-hosted agent. It has been modified to include the following build tools
 #   - docker-ce-cli
 #   - Aqua Trivy, an open source Container image scanner (ID09272019)
-#   - Azure CLI (ID09262019)
+#   - Azure CLI
 #   - kubectl
 #   - helm
 #
-# NOTES:
-# ganrad01: ID10092020 : Use base image Ubuntu:18.04, libcurl4 and Helm v3
-# ganrad01: ID02242021 : libicu60 is a dependency for .NET Core 3.1
-#
-FROM --platform=linux/amd64 ubuntu:20.04
-MAINTAINER Ganesh Radhakrishnan ganrad01@gmail.com
+
+FROM --platform=linux/amd64 ubuntu:22.04
 
 # To make it easier for build and release pipelines to run apt-get,
 # configure apt to not require confirmation (assume the -y argument by default)
 ENV DEBIAN_FRONTEND=noninteractive
 RUN echo "APT::Get::Assume-Yes \"true\";" > /etc/apt/apt.conf.d/90assumeyes
 
-# ID02242021.sn
 RUN apt-get update
 RUN apt-get dist-upgrade 
 RUN apt-get install -y software-properties-common
-RUN add-apt-repository "deb [arch=amd64] http://security.ubuntu.com/ubuntu xenial-security main restricted"
-# ID02242021.en
-
 RUN apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
         jq \
         git \
         iputils-ping \
-	libcurl4 \
-        # libcurl3 \
-        # libicu55 \
-        # libicu60 \
+	libcurl4 \ 
         libunwind8 \
         netcat \
         zip \
@@ -44,10 +33,11 @@ RUN apt-get install -y --no-install-recommends \
         apt-transport-https \
 	gnupg \
         gnupg-agent \
-        # software-properties-common \
         apt-utils
 
-# https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
+RUN wget http://security.ubuntu.com/ubuntu/pool/main/i/icu/libicu66_66.1-2ubuntu2_amd64.deb
+
+# Set up Docker's apt repository
 RUN apt-get install ca-certificates curl gnupg
 RUN install -m 0755 -d /etc/apt/keyrings
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -75,11 +65,6 @@ RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl \
 && chmod +x ./kubectl \
 && mv ./kubectl /usr/local/bin/kubectl
-
-# Install helm v2 (latest)
-# RUN wget https://get.helm.sh/helm-v2.16.0-linux-amd64.tar.gz \
-# && tar -zxvf helm-v2.16.0-linux-amd64.tar.gz \
-# && mv ./linux-amd64/helm /usr/local/bin/helm
 
 # Install helm v3 (latest)
 RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 \
