@@ -1,0 +1,71 @@
+---
+# Source: devops-agent/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: az-devops-agent-chart
+  labels:
+    app.kubernetes.io/name: devops-agent
+    helm.sh/chart: devops-agent-0.1.0
+    app.kubernetes.io/instance: az-devops-agent-chart
+    app.kubernetes.io/version: "1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: devops-agent
+      app.kubernetes.io/instance: az-devops-agent-chart
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: devops-agent
+        app.kubernetes.io/instance: az-devops-agent-chart
+    spec:
+      imagePullSecrets:
+        - name: registrykey
+      volumes:
+        - name: dind-storage
+          emptyDir: {}
+        - name: trivy-cache
+          hostPath:
+            path: /var/trivy/Library/Caches
+            type: DirectoryOrCreate
+      containers:
+        - name: devops-agent
+          image: "teamrocketregistry.azurecr.io/azdevopsagent:v11-clean"
+          env:
+          - name: DOCKER_HOST
+            value: tcp://localhost:2375
+          - name: AZP_URL
+            value: "https://dev.azure.com/team-rocket"
+          - name: AZP_TOKEN
+            value: ""
+          - name: AZP_POOL
+            value: "AKS-Agent-Pool"
+          - name: AZP_AGENT_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          imagePullPolicy: Always
+          volumeMounts:
+          - name: trivy-cache
+            mountPath: /root/.cache
+          securityContext:
+            privileged: true
+          resources:
+            {}
+        - name: dind
+          image: "docker:20.10.4-dind"
+          securityContext:
+            privileged: true
+          env:
+          - name: DOCKER_TLS_CERTDIR
+            value: ''
+          volumeMounts:
+          - name: dind-storage
+            mountPath: /var/lib/docker
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
