@@ -33,16 +33,16 @@ spec:
             type: DirectoryOrCreate
       containers:
         - name: devops-agent
-          image: "teamrocketregistry.azurecr.io/azdevopsagent:v11-clean"
+          image: "yradsmikham/az-devops-agent-aks:v2.0"
           env:
           - name: DOCKER_HOST
             value: tcp://localhost:2375
           - name: AZP_URL
-            value: "https://dev.azure.com/team-rocket"
+            value: "https://dev.azure.com/<org>"
           - name: AZP_TOKEN
-            value: ""
+            value: <azure_devops_token>
           - name: AZP_POOL
-            value: "AKS-Agent-Pool"
+            value: "<azure_devops_pool_name>"
           - name: AZP_AGENT_NAME
             valueFrom:
               fieldRef:
